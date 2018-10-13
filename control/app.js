@@ -229,9 +229,61 @@ setTimeout(async() => {
     }, null, true, 'America/Los_Angeles');
 }, 1000);
 
+setTimeout(async() => {
+    var sch = await Schedule.findOne({"name":"bachfile8"});
+    console.log(sch.start)
+    var CronJob = require('cron').CronJob;
+    new CronJob('0 '+sch.start+' * * * *', function() {
+
+        cleanLog("batchfile8")
+
+        let spawn = require('child_process').spawn,
+        ls = spawn('cmd.exe', ['/c', 'batchfile8.bat']);
+
+        ls.stdout.on('data', function (data) {
+        console.log('stdout: ' + data);
+        });
+
+        ls.stderr.on('data', function (data) {
+        console.log('stderr: ' + data);
+        });
+
+        ls.on('exit', function (code) {
+        console.log('child process exited with code ' + code);
+        });
+
+    }, null, true, 'America/Los_Angeles');
+}, 1000);
+
+setTimeout(async() => {
+    var sch = await Schedule.findOne({"name":"bachfile9"});
+    console.log(sch.start)
+    var CronJob = require('cron').CronJob;
+    new CronJob('0 '+sch.start+' * * * *', function() {
+
+        cleanLog("batchfile9")
+
+        let spawn = require('child_process').spawn,
+        ls = spawn('cmd.exe', ['/c', 'batchfile9.bat']);
+
+        ls.stdout.on('data', function (data) {
+        console.log('stdout: ' + data);
+        });
+
+        ls.stderr.on('data', function (data) {
+        console.log('stderr: ' + data);
+        });
+
+        ls.on('exit', function (code) {
+        console.log('child process exited with code ' + code);
+        });
+
+    }, null, true, 'America/Los_Angeles');
+}, 1000);
+
 
 var mongoose = require('mongoose');
-var activityObj = {};
+var activityObj = "";
 var Activity = require('./models/activity.js');
 
 function cleanLog(str){
@@ -242,26 +294,15 @@ function cleanLog(str){
 
     fs.readFile(filePath, {encoding: 'utf-8'}, function(err,data){
         if (!err) {
-            if(findWord("NoSuchElementError", data)){
-                var newActivity = new Activity({
-                    name: data.substring(0,10),
-                    lastRun : Date.now(),
-                    error: true
-                });
-            }else if(findWord("Element not found", data)){
-                var newActivity = new Activity({
-                    name: data.substring(0,10),
-                    lastRun : Date.now(),
-                    error: true
-                });
-            }else{
-                var newActivity = new Activity({
-                    name: data.substring(0,10),
-                    lastRun : Date.now(),
-                    error: false
-                });
-            }
+            //TypeError: Cannot read property 'name' of null
+            console.log(data)
 
+            var newActivity = new Activity({
+                name: str,
+                lastRun : Date.now(),
+                error: data
+            });
+            
             newActivity.save( function( err ){
                 if(!err){
                 console.log('Activity saved!');
@@ -273,24 +314,29 @@ function cleanLog(str){
         }
     });
 
+    setTimeout(() => {
 
-    var fs = require('fs');
-    path = require('path'),    
-    filePath = path.join(__dirname, '../../.pm2/logs/app-out.log');
-    fs.writeFile(filePath, str+"\n", function(err) {
-        if(err) {
-            return console.log(err);
-        }
+        var fs = require('fs');
+        path = require('path'),    
+        filePath = path.join(__dirname, '../../.pm2/logs/app-out.log');
+        fs.writeFile(filePath, "", function(err) {
+            if(err) {
+                return console.log(err);
+            }
 
-        console.log("The file was saved!");
-    });
+            console.log("The file was saved!");
+        });
+
+        
+    }, 9000);
+
 }
-
 
 function findWord(word, str) {
 
     return RegExp('\\b'+ word +'\\b').test(str)
 }
+
 
 mongoose.connect('mongodb://localhost:27017/project2',(err)=>{
   if(!err){
